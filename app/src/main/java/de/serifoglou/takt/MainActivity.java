@@ -13,10 +13,10 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,11 +38,18 @@ public class MainActivity extends Activity {
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setBackgroundColor(Color.rgb(3,20,38));
         LinearLayout bar=new LinearLayout(this);bar.setGravity(Gravity.CENTER_VERTICAL);bar.setPadding(dp(14),0,dp(8),0);
         TextView name=new TextView(this);name.setText("Takt");name.setTextColor(Color.WHITE);name.setTextSize(20);name.setTypeface(null,1);bar.addView(name,new LinearLayout.LayoutParams(0,dp(52),1));
-        Button tone=new Button(this);tone.setText("Alarmton");tone.setOnClickListener(v->pickTone());bar.addView(tone,new LinearLayout.LayoutParams(-2,dp(44)));
-        Button test=new Button(this);test.setText("Test");test.setOnClickListener(v->testAlarm());bar.addView(test,new LinearLayout.LayoutParams(-2,dp(44)));
-        root.addView(bar,new LinearLayout.LayoutParams(-1,dp(54)));
-        webView=new WebView(this);webView.getSettings().setJavaScriptEnabled(true);webView.getSettings().setDomStorageEnabled(true);webView.setWebViewClient(new WebViewClient());webView.setWebChromeClient(new WebChromeClient());webView.addJavascriptInterface(new TaktBridge(),"TaktAndroid");
+        root.addView(bar,new LinearLayout.LayoutParams(-1,dp(52)));
+        webView=new WebView(this);webView.getSettings().setJavaScriptEnabled(true);webView.getSettings().setDomStorageEnabled(true);webView.setWebViewClient(new WebViewClient(){
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){return openSafely(request.getUrl());}
+            @Override public boolean shouldOverrideUrlLoading(WebView view,String url){return openSafely(Uri.parse(url));}
+        });webView.setWebChromeClient(new WebChromeClient());webView.addJavascriptInterface(new TaktBridge(),"TaktAndroid");
         root.addView(webView,new LinearLayout.LayoutParams(-1,0,1));return root;
+    }
+
+    private boolean openSafely(Uri uri){
+        if("https".equals(uri.getScheme())&&"takt-kalender.bauz-451.chatgpt.site".equals(uri.getHost()))return false;
+        try{startActivity(new Intent(Intent.ACTION_VIEW,uri));}catch(Exception ignored){Toast.makeText(this,"Link konnte nicht geöffnet werden.",Toast.LENGTH_SHORT).show();}
+        return true;
     }
 
     private void requestNotificationPermission(){if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},7);}
