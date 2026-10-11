@@ -9,13 +9,33 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
+import java.util.Calendar;
+import org.json.JSONObject;
 
 public class AlarmReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent intent) {
         String id = intent.getStringExtra("id");
         context.getSharedPreferences(AlarmScheduler.PREFS, Context.MODE_PRIVATE).edit().remove(id == null ? "" : id).apply();
+        scheduleNextDaily(context, intent, id);
         if ("notification".equals(intent.getStringExtra("mode"))) showNotification(context, intent);
         else context.startForegroundService(new Intent(context, AlarmService.class).putExtras(intent));
+    }
+
+    private void scheduleNextDaily(Context context, Intent source, String id) {
+        if (!source.getBooleanExtra("repeatDaily", false) || id == null) return;
+        Calendar next = Calendar.getInstance();
+        next.setTimeInMillis(source.getLongExtra("triggerAt", System.currentTimeMillis()));
+        next.add(Calendar.DAY_OF_MONTH, 1);
+        long repeatUntil = source.getLongExtra("repeatUntil", 0L);
+        if (repeatUntil > 0 && next.getTimeInMillis() > repeatUntil) return;
+        try {
+            JSONObject data = new JSONObject()
+                    .put("id", id).put("title", source.getStringExtra("title"))
+                    .put("url", source.getStringExtra("url")).put("tone", source.getStringExtra("tone"))
+                    .put("mode", source.getStringExtra("mode")).put("triggerAt", next.getTimeInMillis())
+                    .put("repeatDaily", true).put("repeatUntil", repeatUntil);
+            AlarmScheduler.schedule(context, data, true);
+        } catch (Exception ignored) {}
     }
 
     private void showNotification(Context context, Intent source) {
