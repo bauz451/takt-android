@@ -24,7 +24,7 @@ public final class AlarmScheduler {
         Intent intent = new Intent(context, AlarmReceiver.class)
                 .putExtra("id", id)
                 .putExtra("title", data.optString("title", "Takt-Erinnerung"))
-                .putExtra("url", data.optString("url", "https://takt-kalender.serif-serifoglou.chatgpt.site/?reminder=" + id))
+                .putExtra("url", data.optString("url", "https://takt-kalender.bauz-451.chatgpt.site/?reminder=" + id))
                 .putExtra("mode", data.optString("mode", "alarm"))
                 .putExtra("tone", data.optString("tone", ""));
         PendingIntent pending = PendingIntent.getBroadcast(context, requestCode(id), intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
