@@ -40,6 +40,7 @@ public class AlarmService extends Service {
 
     private void play(String tone) {
         try {
+            if (player != null) { player.stop(); player.release(); player = null; }
             Uri uri = tone == null || tone.isEmpty() ? RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM) : Uri.parse(tone);
             player = new MediaPlayer();
             player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build());
