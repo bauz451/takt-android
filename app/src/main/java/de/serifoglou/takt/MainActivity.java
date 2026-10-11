@@ -29,10 +29,10 @@ public class MainActivity extends Activity {
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state); requestNotificationPermission(); setContentView(buildView());
-        String url=getIntent().getStringExtra("openUrl"); webView.loadUrl(url==null||url.isEmpty()?APP_URL:url);
+        String url=getIntent().getStringExtra("openUrl"); webView.loadUrl(safeAppUrl(url));
     }
 
-    @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); String url=intent.getStringExtra("openUrl"); if(url!=null)webView.loadUrl(url); }
+    @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); String url=intent.getStringExtra("openUrl"); webView.loadUrl(safeAppUrl(url)); }
 
     private LinearLayout buildView() {
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setBackgroundColor(Color.rgb(3,20,38));
@@ -42,14 +42,26 @@ public class MainActivity extends Activity {
         webView=new WebView(this);webView.getSettings().setJavaScriptEnabled(true);webView.getSettings().setDomStorageEnabled(true);webView.setWebViewClient(new WebViewClient(){
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request){return openSafely(request.getUrl());}
             @Override public boolean shouldOverrideUrlLoading(WebView view,String url){return openSafely(Uri.parse(url));}
+            @Override public void onPageStarted(WebView view,String url,android.graphics.Bitmap icon){
+                Uri uri=Uri.parse(url);view.removeJavascriptInterface("TaktAndroid");
+                if(isAppHost(uri))view.addJavascriptInterface(new TaktBridge(),"TaktAndroid");
+                super.onPageStarted(view,url,icon);
+            }
         });webView.setWebChromeClient(new WebChromeClient());webView.addJavascriptInterface(new TaktBridge(),"TaktAndroid");
         root.addView(webView,new LinearLayout.LayoutParams(-1,0,1));return root;
     }
 
     private boolean openSafely(Uri uri){
-        if("https".equals(uri.getScheme())&&"takt-kalender.bauz-451.chatgpt.site".equals(uri.getHost()))return false;
+        if(isAppHost(uri)||isAuthHost(uri))return false;
         try{startActivity(new Intent(Intent.ACTION_VIEW,uri));}catch(Exception ignored){Toast.makeText(this,"Link konnte nicht geöffnet werden.",Toast.LENGTH_SHORT).show();}
         return true;
+    }
+
+    private boolean isAppHost(Uri uri){return "https".equals(uri.getScheme())&&"takt-kalender.bauz-451.chatgpt.site".equals(uri.getHost());}
+    private boolean isAuthHost(Uri uri){String host=uri.getHost();return "https".equals(uri.getScheme())&&host!=null&&(host.equals("chatgpt.com")||host.endsWith(".chatgpt.com")||host.equals("openai.com")||host.endsWith(".openai.com"));}
+    private String safeAppUrl(String value){
+        if(value==null||value.isEmpty())return APP_URL;
+        try{Uri uri=Uri.parse(value);String query=uri.getEncodedQuery();return query==null||query.isEmpty()?APP_URL:APP_URL+"/?"+query;}catch(Exception ignored){return APP_URL;}
     }
 
     private void requestNotificationPermission(){if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},7);}
