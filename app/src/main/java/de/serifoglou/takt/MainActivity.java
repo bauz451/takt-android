@@ -58,6 +58,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public boolean scheduleAlarm(String json){try{JSONObject data=new JSONObject(json);if(data.optString("tone").isEmpty())data.put("tone",getToneUri().toString());if(!AlarmScheduler.canSchedule(MainActivity.this)){runOnUiThread(()->requestAlarmAccess());return false;}return AlarmScheduler.schedule(MainActivity.this,data,true);}catch(Exception e){return false;}}
         @JavascriptInterface public void cancelAlarm(String id){AlarmScheduler.cancel(MainActivity.this,id);}
         @JavascriptInterface public void chooseTone(){runOnUiThread(()->pickTone());}
+        @JavascriptInterface public void testAlarm(){runOnUiThread(()->MainActivity.this.testAlarm());}
         @JavascriptInterface public String selectedTone(){return getToneUri().toString();}
         @JavascriptInterface public void requestAlarmPermission(){runOnUiThread(()->requestAlarmAccess());}
     }
