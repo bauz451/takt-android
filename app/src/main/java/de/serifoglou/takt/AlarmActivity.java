@@ -40,7 +40,7 @@ public class AlarmActivity extends Activity {
 
     private void snooze() {
         try {
-            JSONObject data = new JSONObject().put("id", id).put("title", title).put("url", url).put("tone", tone).put("mode", "alarm").put("triggerAt", System.currentTimeMillis()+10*60*1000L);
+            JSONObject data = new JSONObject().put("id", id + ":snooze").put("title", title).put("url", url).put("tone", tone).put("mode", "alarm").put("triggerAt", System.currentTimeMillis()+10*60*1000L);
             AlarmScheduler.schedule(this, data, true);
         } catch (Exception ignored) {}
         stopService(new Intent(this, AlarmService.class).setAction(AlarmService.ACTION_STOP)); finish();
