@@ -54,11 +54,15 @@ public class AlarmService extends Service {
     }
 
     private void stopAlarm() {
-        if (player != null) { player.stop(); player.release(); player = null; }
-        if (vibrator != null) vibrator.cancel();
+        cleanup();
         stopForeground(STOP_FOREGROUND_REMOVE); stopSelf();
     }
 
-    @Override public void onDestroy() { stopAlarm(); super.onDestroy(); }
+    private void cleanup() {
+        if (player != null) { player.stop(); player.release(); player = null; }
+        if (vibrator != null) vibrator.cancel();
+    }
+
+    @Override public void onDestroy() { cleanup(); super.onDestroy(); }
     @Override public IBinder onBind(Intent intent) { return null; }
 }
