@@ -1,0 +1,1 @@
+-keepclassmembers class de.serifoglou.takt.MainActivity$TaktBridge { public *; }
