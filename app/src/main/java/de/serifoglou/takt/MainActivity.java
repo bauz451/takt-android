@@ -23,7 +23,7 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 public class MainActivity extends Activity {
-    private static final String APP_URL = "https://takt-kalender.serif-serifoglou.chatgpt.site";
+    private static final String APP_URL = "https://takt-kalender.bauz-451.chatgpt.site";
     private static final int PICK_TONE = 41;
     private WebView webView;
 
