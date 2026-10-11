@@ -26,7 +26,10 @@ public final class AlarmScheduler {
                 .putExtra("title", data.optString("title", "Takt-Erinnerung"))
                 .putExtra("url", data.optString("url", "https://takt-kalender.bauz-451.chatgpt.site/?reminder=" + id))
                 .putExtra("mode", data.optString("mode", "alarm"))
-                .putExtra("tone", data.optString("tone", ""));
+                .putExtra("tone", data.optString("tone", ""))
+                .putExtra("triggerAt", triggerAt)
+                .putExtra("repeatDaily", data.optBoolean("repeatDaily", false))
+                .putExtra("repeatUntil", data.optLong("repeatUntil", 0L));
         PendingIntent pending = PendingIntent.getBroadcast(context, requestCode(id), intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         manager.setAlarmClock(new AlarmManager.AlarmClockInfo(triggerAt, pending), pending);
